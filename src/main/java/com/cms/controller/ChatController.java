@@ -19,7 +19,7 @@ public class ChatController {
     @PostMapping
     public ChatResponse chat(@RequestBody ChatRequest request) {
 
-        String reply = chatService.askAI(request.getMessage());
+        String reply = chatService.askAI(request.getMessage(), request.getUserId());
 
         return new ChatResponse(reply);
     }

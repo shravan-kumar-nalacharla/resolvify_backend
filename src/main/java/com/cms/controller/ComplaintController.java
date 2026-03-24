@@ -23,7 +23,10 @@ public class ComplaintController {
     }
 
     @GetMapping
-    public List<Complaint> getAll() {
+    public List<Complaint> getAll(@RequestParam(required = false) Long userId) {
+        if (userId != null) {
+            return complaintService.getComplaintsByUserId(userId);
+        }
         return complaintService.getAllComplaints();
     }
 

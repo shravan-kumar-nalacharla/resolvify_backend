@@ -22,6 +22,11 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public List<Complaint> getComplaintsByUserId(Long userId) {
+        return complaintRepository.findByUserId(userId);
+    }
+
+    @Override
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAll();
     }

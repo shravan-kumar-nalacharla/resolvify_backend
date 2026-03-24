@@ -17,11 +17,13 @@ public class Complaint {
     private String priority;
     private String status;
     private LocalDateTime createdAt;
+    
+    private Long userId;
 
     public Complaint() {
     }
 
-    public Complaint(Long id, String title, String description, String category, String priority, String status, LocalDateTime createdAt) {
+    public Complaint(Long id, String title, String description, String category, String priority, String status, LocalDateTime createdAt, Long userId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -29,6 +31,7 @@ public class Complaint {
         this.priority = priority;
         this.status = status;
         this.createdAt = createdAt;
+        this.userId = userId;
     }
 
     public Long getId() {
@@ -37,6 +40,14 @@ public class Complaint {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getTitle() {

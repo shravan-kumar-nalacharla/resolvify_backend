@@ -9,6 +9,8 @@ public interface ComplaintService {
 
     List<Complaint> getAllComplaints();
 
+    List<Complaint> getComplaintsByUserId(Long userId);
+
     Complaint getComplaint(Long id);
 
     void deleteComplaint(Long id);
