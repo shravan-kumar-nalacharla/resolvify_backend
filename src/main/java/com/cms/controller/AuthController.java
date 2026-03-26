@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,37 +35,31 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // HARDCODED ADMIN CHECK — works even if H2 resets
-        if ("123".equals(request.getUsername()) && "123".equals(request.getPassword())) {
-            
-            // Find or create admin user in current H2 session
-            User admin = userRepository.findByUsername("123")
-                .orElseGet(() -> {
-                    User newAdmin = new User();
-                    newAdmin.setUsername("123");
-                    newAdmin.setPassword("123");
-                    newAdmin.setRole("ADMIN");
-                    return userRepository.save(newAdmin);
-                });
-            
-            admin.setRole("ADMIN");
-            userRepository.save(admin);
-            
-            UserDto dto = new UserDto(admin.getId(), admin.getUsername(), "ADMIN");
-            return ResponseEntity.ok(dto);
+        String username = request.getUsername();
+        String password = request.getPassword();
+
+        // PURE HARDCODED ADMIN — zero database dependency
+        // Works even if H2 is empty, reset, or not seeded
+        if ("123".equals(username) && "123".equals(password)) {
+            Map<String, Object> adminResponse = new HashMap<>();
+            adminResponse.put("id", 0L);
+            adminResponse.put("username", "123");
+            adminResponse.put("role", "ADMIN");
+            return ResponseEntity.ok(adminResponse);
         }
-        
-        // Normal user login flow
-        Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
-        
-        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword())) {
+
+        // Normal users — check database
+        Optional<User> userOpt = userRepository.findByUsername(username);
+
+        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(password)) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
-        
+
         User user = userOpt.get();
-        String role = user.getRole() != null ? user.getRole() : "USER";
-        UserDto dto = new UserDto(user.getId(), user.getUsername(), role);
-        
-        return ResponseEntity.ok(dto);
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        response.put("username", user.getUsername());
+        response.put("role", user.getRole() != null ? user.getRole() : "USER");
+        return ResponseEntity.ok(response);
     }
 }
