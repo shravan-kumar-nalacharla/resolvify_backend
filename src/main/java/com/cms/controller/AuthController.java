@@ -32,13 +32,38 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDto> login(@RequestBody User user) {
-        return userRepository.findByUsername(user.getUsername())
-                .filter(u -> u.getPassword().equals(user.getPassword()))
-                .map(u -> {
-                    String finalRole = ("123".equals(u.getUsername()) && "123".equals(u.getPassword())) ? "ADMIN" : "USER";
-                    return ResponseEntity.ok(new UserDto(u.getId(), u.getUsername(), finalRole));
-                })
-                .orElse(ResponseEntity.status(401).build());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        // HARDCODED ADMIN CHECK — works even if H2 resets
+        if ("123".equals(request.getUsername()) && "123".equals(request.getPassword())) {
+            
+            // Find or create admin user in current H2 session
+            User admin = userRepository.findByUsername("123")
+                .orElseGet(() -> {
+                    User newAdmin = new User();
+                    newAdmin.setUsername("123");
+                    newAdmin.setPassword("123");
+                    newAdmin.setRole("ADMIN");
+                    return userRepository.save(newAdmin);
+                });
+            
+            admin.setRole("ADMIN");
+            userRepository.save(admin);
+            
+            UserDto dto = new UserDto(admin.getId(), admin.getUsername(), "ADMIN");
+            return ResponseEntity.ok(dto);
+        }
+        
+        // Normal user login flow
+        Optional<User> userOpt = userRepository.findByUsername(request.getUsername());
+        
+        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+        
+        User user = userOpt.get();
+        String role = user.getRole() != null ? user.getRole() : "USER";
+        UserDto dto = new UserDto(user.getId(), user.getUsername(), role);
+        
+        return ResponseEntity.ok(dto);
     }
 }
