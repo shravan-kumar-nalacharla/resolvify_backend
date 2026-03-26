@@ -1,8 +1,9 @@
 package com.cms.service.impl;
 
-import com.cms.entity.Complaint;
 import com.cms.service.ChatService;
 import com.cms.service.ComplaintService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ChatServiceImpl implements ChatService {
     private String apiUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final ComplaintService complaintService;
 
     public ChatServiceImpl(ComplaintService complaintService) {
@@ -67,11 +69,22 @@ public class ChatServiceImpl implements ChatService {
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-            return response.getBody();
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                JsonNode root = objectMapper.readTree(response.getBody());
+                String botReply = root.path("candidates")
+                        .get(0)
+                        .path("content")
+                        .path("parts")
+                        .get(0)
+                        .path("text")
+                        .asText();
+                return botReply;
+            }
+            return "AI assistant returned an empty response.";
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "AI assistant is temporarily unavailable. Please try again.";
+            return "AI assistant is temporarily unavailable. Error: " + e.getMessage();
         }
     }
 }
