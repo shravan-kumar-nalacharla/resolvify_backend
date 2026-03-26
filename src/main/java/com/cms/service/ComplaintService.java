@@ -16,4 +16,6 @@ public interface ComplaintService {
     void deleteComplaint(Long id);
 
     Complaint updateComplaint(Long id, Complaint complaint);
+    
+    List<Complaint> searchComplaints(String status, String category, String priority, String keyword, Long userId);
 }

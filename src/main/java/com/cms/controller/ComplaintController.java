@@ -1,7 +1,11 @@
 package com.cms.controller;
 
 import com.cms.entity.Complaint;
+import com.cms.entity.StatusHistory;
+import com.cms.repository.StatusHistoryRepository;
 import com.cms.service.ComplaintService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +16,11 @@ import java.util.List;
 public class ComplaintController {
 
     private final ComplaintService complaintService;
+    private final StatusHistoryRepository statusHistoryRepository;
 
-    public ComplaintController(ComplaintService complaintService) {
+    public ComplaintController(ComplaintService complaintService, StatusHistoryRepository statusHistoryRepository) {
         this.complaintService = complaintService;
+        this.statusHistoryRepository = statusHistoryRepository;
     }
 
     @PostMapping
@@ -36,8 +42,28 @@ public class ComplaintController {
     }
 
     @PutMapping("/{id}")
-    public Complaint update(@PathVariable Long id, @RequestBody Complaint complaint) {
-        return complaintService.updateComplaint(id, complaint);
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Complaint complaint) {
+        Complaint existing = complaintService.getComplaint(id);
+        if (!"OPEN".equalsIgnoreCase(existing.getStatus()) && (complaint.getStatus() == null || existing.getStatus().equalsIgnoreCase(complaint.getStatus()))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only OPEN complaints can be edited by users.");
+        }
+        return ResponseEntity.ok(complaintService.updateComplaint(id, complaint));
+    }
+
+    @GetMapping("/search")
+    public List<Complaint> search(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long userId
+    ) {
+        return complaintService.searchComplaints(status, category, priority, keyword, userId);
+    }
+
+    @GetMapping("/{id}/history")
+    public List<StatusHistory> getHistory(@PathVariable Long id) {
+        return statusHistoryRepository.findByComplaintIdOrderByChangedAtDesc(id);
     }
 
     @DeleteMapping("/{id}")

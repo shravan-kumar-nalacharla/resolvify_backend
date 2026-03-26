@@ -82,3 +82,5 @@ Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.pr
 Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.priority,c1_0.status,c1_0.title from complaints c1_0
 Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.priority,c1_0.status,c1_0.title from complaints c1_0
 Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.priority,c1_0.status,c1_0.title from complaints c1_0
+Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.priority,c1_0.status,c1_0.title from complaints c1_0
+Hibernate: select c1_0.id,c1_0.category,c1_0.created_at,c1_0.description,c1_0.priority,c1_0.status,c1_0.title from complaints c1_0

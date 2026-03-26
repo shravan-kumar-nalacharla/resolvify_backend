@@ -30,18 +30,21 @@ public class ChatServiceImpl implements ChatService {
     public String askAI(String message, Long userId) {
 
         try {
+            String systemPrompt = "You are Resolvify AI, a helpful complaint management assistant. Help users understand complaint statuses, suggest resolutions, and guide them through the system. Be concise and professional.\\n";
             String context = "";
             if (userId != null) {
                 List<Complaint> myComplaints = complaintService.getComplaintsByUserId(userId);
-                context = "System Data: The user asking this question has the following complaints in our database: ";
-                for (Complaint c : myComplaints) {
-                    context += "[ID: " + c.getId() + ", Title: '" + c.getTitle() + "', Status: " + c.getStatus() + "] ";
+                if (!myComplaints.isEmpty()) {
+                    context = "User's current complaints: ";
+                    for (Complaint c : myComplaints) {
+                        context += "[Title: '" + c.getTitle() + "', Status: " + c.getStatus() + "] ";
+                    }
+                    context += "\\n";
                 }
-                context += " Use this system data ONLY to answer questions about the user's complaints.\\n";
             }
             
-            String safeMessage = message.replace("\"", "\\\"");
-            String fullPrompt = context + "User message: " + safeMessage;
+            String safeMessage = message.replace("\"", "\\\"").replace("\n", " ");
+            String fullPrompt = systemPrompt + context + "User message: " + safeMessage;
 
             String url = apiUrl + "?key=" + apiKey;
 
@@ -62,13 +65,13 @@ public class ChatServiceImpl implements ChatService {
 
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
-            ResponseEntity<String> response =
-                    restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
             return response.getBody();
 
         } catch (Exception e) {
-            return "AI service currently unavailable.";
+            e.printStackTrace();
+            return "AI assistant is temporarily unavailable. Please try again.";
         }
     }
 }
