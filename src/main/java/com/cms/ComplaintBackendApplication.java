@@ -17,10 +17,10 @@ public class ComplaintBackendApplication {
 	    @Bean
     CommandLineRunner initDatabase(UserRepository userRepository) {
         return args -> {
-            if (!userRepository.findByUsername("123").isPresent()) {
-                userRepository.save(new User("123", "123", "ADMIN"));
-                System.out.println("Default admin user '123' created with password '123'");
-            }
+            User admin = userRepository.findByUsername("123").orElse(new User("123", "123", "ADMIN"));
+            admin.setRole("ADMIN");
+            userRepository.save(admin);
+            System.out.println("Ensured user '123' has persistent ADMIN rights");
         };
     }
 }

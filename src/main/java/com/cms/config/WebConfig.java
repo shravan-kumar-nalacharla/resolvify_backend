@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173", "http://localhost:3000", "https://resolvify-3.onrender.com", "https://*.onrender.com")
+                        .allowedOriginPatterns("http://localhost:5173", "http://localhost:3000", "https://resolvify-3.onrender.com", "https://*.onrender.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(false);
