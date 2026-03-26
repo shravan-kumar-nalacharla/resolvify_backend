@@ -34,8 +34,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String username = request.getUsername();
-        String password = request.getPassword();
+        if (request == null) return ResponseEntity.badRequest().body("Request body is missing");
+        
+        String username = request.getUsername() != null ? request.getUsername().trim() : "";
+        String password = request.getPassword() != null ? request.getPassword().trim() : "";
+
+        System.out.println("Login attempt: username='" + username + "'");
 
         // SCRATCH REBUILD: Hardcoded Admin bypass
         if ("123".equals(username) && "123".equals(password)) {
