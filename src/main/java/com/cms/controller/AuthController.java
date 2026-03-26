@@ -56,6 +56,6 @@ public class AuthController {
             return ResponseEntity.ok(new UserDto(user.getId(), user.getUsername(), user.getRole()));
         }
 
-        return ResponseEntity.status(401).body("Invalid credentials");
+        return ResponseEntity.status(401).body("Invalid credentials. Received: username='" + username + "', password='" + password + "'");
     }
 }
