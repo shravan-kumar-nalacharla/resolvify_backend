@@ -30,22 +30,47 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String askAI(String message, Long userId) {
+    public String askAI(String message, Long userId, boolean isAdmin) {
 
         try {
-            String systemPrompt = "You are Resolvify AI, a helpful complaint management assistant. Help users understand complaint statuses, suggest resolutions, and guide them through the system. Be concise and professional.\\n";
+            String systemPrompt = "You are Resolvify AI, a helpful complaint management assistant. " +
+                "Help users understand complaint statuses, suggest resolutions, and guide them through the system. " +
+                "When asked about complaints, refer to the context provided. " +
+                "Be concise (max 3 sentences) and professional.\n";
+
             String context = "";
-            if (userId != null) {
+            if (isAdmin) {
+                List<Complaint> allComplaints = complaintService.getAllComplaints();
+                if (!allComplaints.isEmpty()) {
+                    context = "All system complaints (" + allComplaints.size() + " total): ";
+                    for (Complaint c : allComplaints) {
+                        context += "[ID:" + c.getId()
+                            + ", Title:'" + c.getTitle()
+                            + "', Status:" + c.getStatus()
+                            + ", Priority:" + c.getPriority()
+                            + ", Category:" + c.getCategory() + "] ";
+                    }
+                    context += "\n";
+                } else {
+                    context = "There are currently no complaints in the system.\n";
+                }
+            } else if (userId != null) {
                 List<Complaint> myComplaints = complaintService.getComplaintsByUserId(userId);
                 if (!myComplaints.isEmpty()) {
-                    context = "User's current complaints: ";
+                    context = "User's complaints: ";
                     for (Complaint c : myComplaints) {
-                        context += "[Title: '" + c.getTitle() + "', Status: " + c.getStatus() + "] ";
+                        context += "[ID:" + c.getId()
+                            + ", Title:'" + c.getTitle()
+                            + "', Status:" + c.getStatus()
+                            + ", Priority:" + c.getPriority()
+                            + ", Category:" + c.getCategory() + "] ";
                     }
-                    context += "\\n";
+                    context += "\n";
+                } else {
+                    context = "The user has no complaints yet.\n";
                 }
             }
-            
+
             String safeMessage = message.replace("\"", "\\\"").replace("\n", " ");
             String fullPrompt = systemPrompt + context + "User message: " + safeMessage;
 
